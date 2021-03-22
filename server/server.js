@@ -75,9 +75,17 @@ app.get('/reviews/meta', (req, res) => {
 app.post('/reviews')
 
 app.put('/reviews/:review_id/helpful', (req, res) => {
-  console.log('review_id: ', req.params.review_id);
-  res.send('why hello there');
-  let sqlString = `UPDATE reviews`
+  let sqlString = `UPDATE reviews SET helpfulness = helpfulness + 1 WHERE review_id = ${req.params.review_id}`
+  db.query(sqlString, (error, results) => {
+    if (error) {
+      console.log('query error for marking review as helpful')
+      res.sendStatus(400);
+    } else {
+      res.status(200).send('Updated!');
+    }
+  })
 })
 
-app.put('/reviews/:review_id/report')
+app.put('/reviews/:review_id/report', (req, res) => {
+
+})
