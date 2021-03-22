@@ -36,20 +36,48 @@ app.get('/reviews', (req, res) => {
       res.sendStatus(400);
     } else {
       res.send(utility.organizeReviews(reviews, page, count, req.query.sort));
-      // res.send(reviews);
     }
   })
-
-  // extract request params from GET request (DONE)
-  // invoke query to grab all the necessary reviews data that needs to be sent back to client (DONE)
-  // invoke utility helper function to restructure response data from db (REFACTORING)
-  // send data back to client (DONE)
+  // implement sort, page, and count functionality
 })
 
-app.get('/reviews/meta')
+app.get('/reviews/meta', (req, res) => {
+  let productId = req.query.product_id;
+  
+  let ratingSQLString = `SELECT rating, COUNT(*) AS count FROM reviews WHERE product_id = ${productId} GROUP BY rating ORDER BY rating`;
+  let recommendSQLString = `SELECT recommend, COUNT(*) AS count FROM reviews WHERE product_id = ${productId} GROUP BY recommend`;
+  let characteristicSQLString = `SELECT characteristics.characteristic, characteristics.characteristic_id, AVG(characteristic_reviews.characteristic_rating) AS avg FROM characteristics INNER JOIN characteristic_reviews ON characteristics.characteristic_id = characteristic_reviews.characteristic_id WHERE characteristics.product = ${productId} GROUP BY characteristics.characteristic, characteristics.characteristic_id`;
+  
+  db.query(ratingSQLString, (error, ratings) => {
+    if (error) {
+      console.log('query error for ratings based on product_id')
+      res.sendStatus(400);
+    } else {
+      db.query(recommendSQLString, (error, recommends) => {
+        if (error) {
+          console.log('query error for recommends based on product_id')
+          res.sendStatus(400);
+        } else {
+          db.query(characteristicSQLString, (error, characteristics) => {
+            if (error) {
+              console.log('query error for characteristics based on product_id')
+              res.sendStatus(400);
+            } else {
+              res.send(utility.organizeMeta(productId, ratings, recommends, characteristics));
+            }
+          })
+        }
+      }) 
+    }
+  })
+})
 
 app.post('/reviews')
 
-app.put('/reviews/review_id:/helpful')
+app.put('/reviews/:review_id/helpful', (req, res) => {
+  console.log('review_id: ', req.params.review_id);
+  res.send('why hello there');
+  let sqlString = `UPDATE reviews`
+})
 
-app.put('/reviews/review_id:/report')
+app.put('/reviews/:review_id/report')

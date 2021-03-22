@@ -41,7 +41,8 @@ CREATE TABLE characteristics
   characteristic_id INT NOT NULL AUTO_INCREMENT,
   product INT NOT NULL,
   characteristic VARCHAR(30) NOT NULL,
-  PRIMARY KEY (characteristic_id)
+  PRIMARY KEY (characteristic_id),
+  INDEX (product)
 );
 
 CREATE TABLE characteristic_reviews
