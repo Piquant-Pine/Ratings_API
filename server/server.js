@@ -13,6 +13,7 @@ app.listen(port, () => {
 const db = require('../SQL/connection.js');
 
 app.get('/reviews', (req, res) => {
+  console.log('LOGGING THE REQ QUERY: ', req.query);
   let page;
   let count;
 
@@ -73,7 +74,50 @@ app.get('/reviews/meta', (req, res) => {
   })
 })
 
-app.post('/reviews')
+app.post('/reviews', (req, res) => {
+  let recommend;
+  if (req.query.recommend === true) {
+    recommend = 1;
+  } else if (req.query.recommend === false) {
+    recommend = 0;
+  }
+
+  let reviewsSQLString = `INSERT INTO reviews (product_id, rating, summary, body, recommend, reviewer_name, reviewer_email) VALUES (${req.query.product_id}, ${req.query.rating}, ${req.query.summary}, ${req.query.body}, ${recommend}, ${req.query.name}, ${req.query.email})`;
+  db.query(reviewsSQLString, (error, results) => {
+    if (error) {
+      console.log('query error for inserting into reviews table')
+      res.sendStatus(400);
+    } else {
+      let photosSQLString = `INSERT INTO photos (review, url_link) VALUES (`
+      for (let i = 0; i < req.query.photos.length; i++) {
+        if (i !== req.query.photos.length - 1) {
+          photosSQLString += `(${results.insertId}, ${req.query.photos[i]}), `
+        } else {
+          photosSQLString += `(${results.insertId}, ${req.query.photos[i]}))`
+        }
+        // IDEA BEFORE BED - instead of making so many queries, just use the for loop to concat & prepare the query based on photo array length
+      }
+      db.query(photosSQLString, (error, photos) => {
+        if (error) {
+          console.log('querry error for inserting into reviews table')
+          res.status(400);
+        } else {
+          let characteristicsSQLString = `INSERT INTO characteristics_reviews (characteristic_id, review, characteristic_rating) VALUES (`
+          for (let key in req.query.characteristics) {
+            characteristicsSQLString += `(${Number(key)}, ${results.insertId}, ${req.query.characteristics[key]})`
+          }
+          characteristicsSQLString += `)`;
+          db.query(characteristicsSQLString, (error, characteristics) => {
+            if (error) {
+              console.log('query error for inserting into characteristic reviews table')
+              res.status(201).send('Review posted!');
+            }
+          })
+        }
+      })
+    }
+  })
+})
 
 app.put('/reviews/:review_id/helpful', (req, res) => {
   let sqlString = `UPDATE reviews SET helpfulness = helpfulness + 1 WHERE review_id = ${req.params.review_id}`
