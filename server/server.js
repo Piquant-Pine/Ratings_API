@@ -10,7 +10,7 @@ app.listen(port, () => {
   console.log(`Listening at http://localhost:${port}`);
 })
 
-const db = require('../SQL/connection.js');
+const db = require('../db/connection.js');
 
 app.get('/reviews', (req, res) => {
   console.log('LOGGING THE REQ QUERY: ', req.query);

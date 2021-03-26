@@ -4,9 +4,6 @@ CREATE DATABASE ratings;
 
 USE ratings;
 
-/* Need to update date format specifications */
-/* question about how to reference product_id from a table that doesn't exist in this service API schema? */
-/* UPDATE INDEXES - CREATE INDEX product_id ON reviews (product_id) */
 CREATE TABLE reviews
 (
   review_id INT NOT NULL AUTO_INCREMENT,
@@ -25,6 +22,16 @@ CREATE TABLE reviews
   INDEX (product_id)
 );
 
+LOAD DATA LOCAL INFILE './ETL/Transformed/reviews-transformed.csv' INTO TABLE reviews
+FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(review_id, product_id, rating, @date, summary, body, @recommend, @reported, reviewer_name, reviewer_email, response, helpfulness)
+SET review_date = STR_TO_DATE(@date, '%Y-%m-%d'),
+    recommend = (@recommend = 'true'),
+    reported = (@reported = 'true')
+;
+
 CREATE TABLE photos
 (
   photo_id INT NOT NULL AUTO_INCREMENT,
@@ -36,6 +43,13 @@ CREATE TABLE photos
     ON DELETE CASCADE
 );
 
+LOAD DATA LOCAL INFILE './ETL/Transformed/photos-transformed.csv' INTO TABLE photos
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(photo_id, review, url_link)
+;
+
 CREATE TABLE characteristics
 (
   characteristic_id INT NOT NULL AUTO_INCREMENT,
@@ -44,6 +58,13 @@ CREATE TABLE characteristics
   PRIMARY KEY (characteristic_id),
   INDEX (product)
 );
+
+LOAD DATA LOCAL INFILE './ETL/Transformed/characteristics-transformed.csv' INTO TABLE characteristics
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(characteristic_id, product, characteristic)
+;
 
 CREATE TABLE characteristic_reviews
 (
@@ -59,3 +80,10 @@ CREATE TABLE characteristic_reviews
     REFERENCES reviews (review_id)
     ON DELETE CASCADE
 );
+
+LOAD DATA LOCAL INFILE './ETL/Transformed/charReviews-transformed.csv' INTO TABLE characteristic_reviews
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(characteristic_rating_id, characteristic_id, review, characteristic_rating)
+;
