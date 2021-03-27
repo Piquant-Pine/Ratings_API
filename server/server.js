@@ -143,3 +143,6 @@ app.put('/reviews/:review_id/report', (req, res) => {
     }
   })
 })
+
+// loader.io token
+app.use('/', express.static('../public'));
