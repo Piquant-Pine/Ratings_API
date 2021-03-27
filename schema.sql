@@ -43,7 +43,7 @@ CREATE TABLE photos
     ON DELETE CASCADE
 );
 
-LOAD DATA LOCAL INFILE './ETL/Transformed/photos-transformed.csv' INTO TABLE photos
+LOAD DATA LOCAL INFILE '/home/ubuntu/photos-transformed.csv' INTO TABLE photos
 FIELDS TERMINATED BY ','
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
