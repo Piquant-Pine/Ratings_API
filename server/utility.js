@@ -2,9 +2,9 @@ module.exports = {
   organizeReviews: function (reviews, page, count, sort) {
     let reviewsData = {};
     
-    reviewsData['product'] = reviews[0].product_id;
-    reviewsData['page'] = page;
-    reviewsData['count'] = count;
+    // reviewsData['product'] = reviews[0].product_id;
+    // reviewsData['page'] = page;
+    // reviewsData['count'] = count;
 
     let resultsArray = [];
     for (let i = 0; i < reviews.length; i++) {
